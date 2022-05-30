@@ -1,5 +1,5 @@
 //siema
-
+//co tam
 export {Ship, Gameboard};
 const Ship = (slots) => {
     let length=slots;
