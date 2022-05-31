@@ -60,3 +60,16 @@ test('checking if it catches placing ship on another ship', ()=> {
     // expect(example.length).toBe(2); 
 })
 
+test("checking if a given ship's coordinates work", ()=>{
+    let example=Ship(2);
+    let dupa=Gameboard();
+    dupa.placeShip(example, [0,0], 'horizontal');
+    expect(example.coordinates).toStrictEqual([[0,0],[0,1]]);
+})
+
+test("checking if receiving a valid attack works", ()=> {
+    let example=Ship(2);
+    let dupa=Gameboard();
+    dupa.placeShip(example, [0,0], 'horizontal');
+    expect(dupa.receiveAttack([0, 0])).toBe("Hit");
+})

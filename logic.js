@@ -18,13 +18,17 @@ const Ship = (slots) => {
         }
         return true;
     }
+    let coordinates =[];
     return {
-        length, hit, isSunk,
+        length, hit, isSunk, coordinates,
     }
 }
 
 const Gameboard = () => {  //koordynaty (coords) => coords[0] to y, coords[1] to x
-    let tables = []
+    let tables = [];
+    let ships =[];
+    let missed=[];
+    let numberOfHits=0;
     for (let i =0; i<10;i++) tables.push([]);
     for (let i =0;i<10;i++) {
         for (let j=0;j<10;j++){
@@ -37,7 +41,9 @@ const Gameboard = () => {  //koordynaty (coords) => coords[0] to y, coords[1] to
                 for (let i=0;i<ship.length;i++) {
                     if (tables[coords[0]+i][coords[1]]!=-1) return Error(`Ship is already placed there (${coords[0]+i}, ${coords[1]})`)
                     tables[coords[0]+i][coords[1]]+=1;
+                    ship.coordinates.push([coords[0]+i,coords[1]])
                 }
+                ships.push(ship);
                 return "ok"
             }
             else return Error('Ship is too long');
@@ -46,20 +52,36 @@ const Gameboard = () => {  //koordynaty (coords) => coords[0] to y, coords[1] to
             if (coords[1]+ship.length<10) {
                 for (let i=0;i<ship.length;i++) {
                     if (tables[coords[0]][coords[1]+i]!=-1) return Error(`Ship is already placed there (${coords[0]}, ${coords[1]+i})`)
-
+                    ship.coordinates.push([coords[0],coords[1]+i]);
                     tables[coords[0]][coords[1]+i]+=1;
                 }
+                ships.push(ship);
                 return "ok"
             }
             else return Error('Ship is too long');
         }
         else return Error("Wrong direction");
     }
-    let receiveAttack = (coords)=> {
-        if (tables[coords[0]][coords[1]] == 0) {}
+    let receiveAttack = (coords)=> { 
+        if (tables[coords[0]][coords[1]] == 0) {
+            for(let i=0;i<ships.length;i++){ //searching for a ship that those coords belong to
+                for (let coord of ships[i].coordinates){
+                    if (JSON.stringify(coord) === JSON.stringify(coords)){ //gotta use JSON.stringify because simple == or === doesn't work with arrays
+                        ships[i].hit(ships[i].coordinates.indexOf(coord)+1);
+                        tables[coords[0]][coords[1]] =1;
+                        numberOfHits+=1;
+                        return "Hit";
+                    }
+                }
+            }
+        }
+        else if (tables[coords[0]][coords[1]] == -1) {
+            missed.push([[coords[0]],[coords[1]]]);
+            return "Miss";
+        }
     }
     return {
-        tables, placeShip,
+        tables, placeShip, receiveAttack,
     }
 }
 
