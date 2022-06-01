@@ -73,3 +73,25 @@ test("checking if receiving a valid attack works", ()=> {
     dupa.placeShip(example, [0,0], 'horizontal');
     expect(dupa.receiveAttack([0, 0])).toBe("Hit");
 })
+
+test("checking if allShipsSunk() works (false)", ()=>{
+    let example = Ship(2);
+    let example2 = Ship(2);
+    let dupa = Gameboard();
+    dupa.placeShip(example,[0,0],'horizontal');
+    dupa.placeShip(example2,[1,0],'horizontal');
+    dupa.receiveAttack([0,0]);
+    expect(dupa.allShipsSunk()).toBeFalsy();
+})
+test("checking if allShipsSunk() works (true)", ()=>{
+    let example = Ship(2);
+    let example2 = Ship(2);
+    let dupa = Gameboard();
+    dupa.placeShip(example,[0,0],'horizontal');
+    dupa.placeShip(example2,[1,0],'horizontal');
+    dupa.receiveAttack([0,0]);
+    dupa.receiveAttack([1,0]);
+    dupa.receiveAttack([1,1]);
+    
+    expect(dupa.numberOfHits()).toBe(3);
+})
