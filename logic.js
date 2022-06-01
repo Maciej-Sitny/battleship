@@ -28,12 +28,20 @@ const Gameboard = () => {  //koordynaty (coords) => coords[0] to y, coords[1] to
     let tables = [];
     let ships =[];
     let missed=[];
-    let numberOfHits=0;
+    let slotsUsed=[];
+
     for (let i =0; i<10;i++) tables.push([]);
-    for (let i =0;i<10;i++) {
+    for (let i =0;i<10;i++) { //-1 if coords are free, 0 if they are taken by a ship, 1 if this slot was hit succesfully
         for (let j=0;j<10;j++){
             tables[i][j]=-1;
         }
+    }
+    let allShipsSunk = () => {
+        let allSlots=0;
+        for (let ship of ships) {
+            allSlots+=ship.length;
+        }
+        return allSlots == numberOfHits;
     }
     let placeShip = (ship,coords, direction)=>{ //cords array, direction "horizontal" or "perpendicular"
         if (direction == "perpendicular"){
@@ -69,7 +77,7 @@ const Gameboard = () => {  //koordynaty (coords) => coords[0] to y, coords[1] to
                     if (JSON.stringify(coord) === JSON.stringify(coords)){ //gotta use JSON.stringify because simple == or === doesn't work with arrays
                         ships[i].hit(ships[i].coordinates.indexOf(coord)+1);
                         tables[coords[0]][coords[1]] =1;
-                        numberOfHits+=1;
+                        slotsUsed.push(coords);
                         return "Hit";
                     }
                 }
@@ -77,11 +85,20 @@ const Gameboard = () => {  //koordynaty (coords) => coords[0] to y, coords[1] to
         }
         else if (tables[coords[0]][coords[1]] == -1) {
             missed.push([[coords[0]],[coords[1]]]);
+            slotsUsed.push(coords);
+
             return "Miss";
         }
     }
+    let numberOfHits =()=>{
+        let a=0;
+        for (let i = 0; i<10;i++){
+            for (let j=0;j<10;j++) if (tables[i][j]==1) a+=1;
+        }
+        return a;
+    }
     return {
-        tables, placeShip, receiveAttack,
+        tables, placeShip, receiveAttack, allShipsSunk, numberOfHits,slotsUsed,
     }
 }
 
