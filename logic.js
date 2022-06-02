@@ -41,7 +41,7 @@ const Gameboard = () => {  //koordynaty (coords) => coords[0] to y, coords[1] to
         for (let ship of ships) {
             allSlots+=ship.length;
         }
-        return allSlots == numberOfHits;
+        return allSlots == numberOfHits();
     }
     let placeShip = (ship,coords, direction)=>{ //cords array, direction "horizontal" or "perpendicular"
         if (direction == "perpendicular"){
@@ -102,5 +102,91 @@ const Gameboard = () => {  //koordynaty (coords) => coords[0] to y, coords[1] to
     }
 }
 
-// module.exports = Ship;
-// module.exports = Gameboard;
+let Computer = (myGameboard, yourGameboard) => {
+    let slotsAttacked =[];
+    function getRandomInt(min, max) {
+        min = Math.ceil(min);
+        max = Math.floor(max);
+        return Math.floor(Math.random() * (max - min)) + min;
+      }
+      
+    let generateNumber = (range1, range2)=> {
+        let y = getRandomInt(range1[0],range1[1])
+        let x = getRandomInt(range2[0],range2[0]);
+        while (myGameboard.slotsUsed.includes([y,x])!=false ) {
+            let y = getRandomInt(range1[0],range1[1])
+            let x = getRandomInt(range2[0],range2[0]);
+        }
+        return [y,x];
+    }
+
+    let placeShips = ()=>{
+        let four = Ship(4);
+        if (getRandomInt(0,2) ==0){
+            
+            myGameboard.placeShip(four, generateNumber([0,10],[0,7]),'horizontal');
+        }
+        else myGameboard.placeShip(four, generateNumber([0,7],[0,10]),'perpendicular');
+        let three1 = Ship(3);
+        let three2 = Ship(3);
+        if (getRandomInt(0,2)==0){
+            myGameboard.placeShip(three1, generateNumber([0,10],[0,8]),'horizontal');
+        }
+        else myGameboard.placeShip(three1, generateNumber([0,8],[0,10]),'perpendicular');
+        if (getRandomInt(0,2)==0){
+            myGameboard.placeShip(three2, generateNumber([0,10],[0,8]),'horizontal');
+        }
+        else myGameboard.placeShip(three2, generateNumber([0,8],[0,10]),'perpendicular');
+        
+        let two1 = Ship(2)
+        let two2 = Ship(2)
+        let two3 = Ship(2)
+
+        if (getRandomInt(0,2)==0){
+            myGameboard.placeShip(two1, generateNumber([0,10],[0,9]),'horizontal');
+        }
+        else myGameboard.placeShip(two1, generateNumber([0,9],[0,10]),'perpendicular');
+        if (getRandomInt(0,2)==0){
+            myGameboard.placeShip(two2, generateNumber([0,10],[0,9]),'horizontal');
+        }
+        else myGameboard.placeShip(two2, generateNumber([0,9],[0,10]),'perpendicular');
+        if (getRandomInt(0,2)==0){
+            myGameboard.placeShip(two3, generateNumber([0,10],[0,9]),'horizontal');
+        }
+        else myGameboard.placeShip(two4, generateNumber([0,9],[0,10]),'perpendicular');
+
+        let one1=Ship(1);
+        let one2=Ship(1);
+        let one3=Ship(1);
+        let one4=Ship(1);
+        if (getRandomInt(0,2)==0){
+            myGameboard.placeShip(one1, generateNumber([0,10],[0,10]),'horizontal');
+        }
+        else myGameboard.placeShip(one1, generateNumber([0,10],[0,10]),'perpendicular');
+        if (getRandomInt(0,2)==0){
+            myGameboard.placeShip(one2, generateNumber([0,10],[0,10]),'horizontal');
+        }
+        else myGameboard.placeShip(one2, generateNumber([0,10],[0,10]),'perpendicular');
+        if (getRandomInt(0,2)==0){
+            myGameboard.placeShip(one3, generateNumber([0,10],[0,10]),'horizontal');
+        }
+        else myGameboard.placeShip(one3, generateNumber([0,10],[0,10]),'perpendicular');
+        if (getRandomInt(0,2)==0){
+            myGameboard.placeShip(one4, generateNumber([0,10],[0,10]),'horizontal');
+        }
+        else myGameboard.placeShip(one5, generateNumber([0,10],[0,10]),'perpendicular');
+    }
+
+    let attack = () => {
+        let y = getRandomInt(0,10);
+        let x = getRandomInt(0,10);
+        while (slotsAttacked.includes([y,x])!=false){
+            let y = getRandomInt(0,10);
+            let x = getRandomInt(0,10);
+        }
+        yourGameboard.receiveAttack([y,x]);
+        slotsUsed.push([y,x]);
+    }
+
+    return {placeShips,attack}
+}
