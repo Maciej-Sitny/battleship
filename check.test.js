@@ -1,5 +1,5 @@
 
-import {Ship, Gameboard} from './logic.js';
+import {Ship, Gameboard, Computer} from './logic.js';
 // test('returns error when slot is incorrect', ()=> {
 //     let example = Ship(2);
 //     example.hit(1);
@@ -95,3 +95,40 @@ test("checking if allShipsSunk() works (true)", ()=>{
     
     expect(dupa.numberOfHits()).toBe(3);
 })
+
+test("checking if Computer's placeShips works", ()=>{
+    let comp = Gameboard();
+    let rival = Gameboard();
+    let computer = Computer(comp,rival);
+    computer.placeShips();
+    let a = ()=>{
+        let b="";
+        for(let i =0;i<10;i++){
+            for (let j = 0; j<10;j++){
+                b+=comp.tables[i][j];
+            }
+            b+=" ";
+        }
+        return b;
+    }
+    expect(comp.tables).toBe("Siema");
+})
+
+// test("dpua", ()=>{
+//     let a = Ship(2);
+//     let o=Ship(4);
+//     let dupa = Gameboard();
+//     dupa.placeShip(a,[6,1],'perpendicular');
+//     dupa.placeShip(o, [5,6],"horizontal")
+//     let c = ()=>{
+//                 let b="";
+//                 for(let i =0;i<10;i++){
+//                     for (let j = 0; j<10;j++){
+//                         b+=dupa.tables[i][j];
+//                     }
+//                     b+=" ";
+//                 }
+//                 return b;
+//             }
+//     expect(c()).toBe("elo")
+// })
