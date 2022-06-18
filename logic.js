@@ -112,11 +112,25 @@ let Computer = (myGameboard, yourGameboard) => {
         max = Math.floor(max-1);
         return Math.floor(Math.random() * (max - min + 1)) + min;
     }
+
+    function baranie(ship, coords,direction){
+        if (direction == 'perpendicular'){
+            for (let i=0;i<ship.length;i++) {
+                if (myGameboard.tables[coords[0]+i][coords[1]]!=-1) return Error;        
+            }
+        }
+        else if (direction=='horizontal'){
+            for (let i=0;i<ship.length;i++) {
+                if (myGameboard.tables[coords[0]][coords[1]+i]!=-1) return Error;      
+            }
+        }
+        return "git";
+    }
       
     let generateNumber = (range1, range2,dupa,ship,direction)=> {
         let y = getRandomInt(range1[0],range1[1]);
         let x = getRandomInt(range2[0],range2[1]);
-        while (dupa.includes([y,x])==true && myGameboard.placeShip(ship,[y,x],direction)==Error) {
+        while (baranie(ship,[y,x],direction)==Error) {
             y = getRandomInt(range1[0],range1[1]);
             x = getRandomInt(range2[0],range2[1]);
         }
@@ -125,36 +139,36 @@ let Computer = (myGameboard, yourGameboard) => {
 
     let placeShips = ()=>{
         let four = Ship(4);
-        if (getRandomInt(0,2) ==0){
-            while(myGameboard.slotsUsed.length!=4){
-                myGameboard.placeShip(four, generateNumber([0,10],[0,7],myGameboard.slotsUsed,four,'horizontal'),'horizontal');
-            }
+        if (getRandomInt(0,2) == 0){
+            while (myGameboard.slotsUsed.length!=4){
+                 myGameboard.placeShip(four, generateNumber([0,7],[0,10],myGameboard.slotsUsed,four,'perpendicular'),'perpendicular');}
+            
         }
         else {
-            while(myGameboard.slotsUsed.length!=4){
-                myGameboard.placeShip(four, generateNumber([0,7],[0,10],myGameboard.slotsUsed,four,'perpendicular'),'perpendicular');
-            }
+            while (myGameboard.slotsUsed.length!=4){
+                 myGameboard.placeShip(four, generateNumber([0,10],[0,7],myGameboard.slotsUsed,four,'horizontal'),'horizontal');}
+            
         }
         let three1 = Ship(3);
         let three2 = Ship(3);
         if (getRandomInt(0,2)==0){
-            while(myGameboard.slotsUsed.length!=7){
-                myGameboard.placeShip(three1, generateNumber([0,10],[0,8],myGameboard.slotsUsed,three1,'horizontal'),'horizontal');
-            }
-        }
-        else {
-            while(myGameboard.slotsUsed.length!=7){
+            while (myGameboard.slotsUsed.length!=7){
                 myGameboard.placeShip(three1, generateNumber([0,8],[0,10],myGameboard.slotsUsed,three1,'perpendicular'),'perpendicular');
             }
         }
+        else {
+            while (myGameboard.slotsUsed.length!=7){
+                 myGameboard.placeShip(three1, generateNumber([0,10],[0,8],myGameboard.slotsUsed,three1,'horizontal'),'horizontal');;
+            }
+        }
         if (getRandomInt(0,2)==0){
-            while(myGameboard.slotsUsed.length!=10){
-                myGameboard.placeShip(three2, generateNumber([0,10],[0,8],myGameboard.slotsUsed,three2,'horizontal'),'horizontal');
+            while (myGameboard.slotsUsed.length!=10){
+                myGameboard.placeShip(three2, generateNumber([0,8],[0,10],myGameboard.slotsUsed,three2,'perpendicular'),'perpendicular');
             }
         }
         else {
-            while(myGameboard.slotsUsed.length!=10){
-                myGameboard.placeShip(three2, generateNumber([0,8],[0,10],myGameboard.slotsUsed,three2,'perpendicular'),'perpendicular');
+            while (myGameboard.slotsUsed.length!=10){
+                myGameboard.placeShip(three2, generateNumber([0,10],[0,8],myGameboard.slotsUsed,three2,'horizontal'),'horizontal');
             }
         }
         let two1 = Ship(2)
@@ -188,7 +202,7 @@ let Computer = (myGameboard, yourGameboard) => {
         }
         else {
             while(myGameboard.slotsUsed.length!=16){
-                myGameboard.placeShip(two3, generateNumber([0,9],[0,10],myGameboard.slotsUsed,two3,'perpendicular'),'perpendicular');
+                if (myGameboard.placeShip(two3, generateNumber([0,9],[0,10],myGameboard.slotsUsed,two3,'perpendicular'),'perpendicular')==Error)myGameboard.placeShip(two3, generateNumber([0,9],[0,10],myGameboard.slotsUsed,two3,'horizontal'),'perpendicular');
             }
         }
 
