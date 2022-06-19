@@ -105,6 +105,21 @@ const Gameboard = () => {  //koordynaty (coords) => coords[0] to y, coords[1] to
     }
 }
 
+let Player = (myGameboard, yourGameboard) => {
+    let slotsAttacked =[];
+    function getRandomInt(min, max) {
+        min = Math.ceil(min);
+        max = Math.floor(max-1);
+        return Math.floor(Math.random() * (max - min + 1)) + min;
+    }
+    let attack = (y,x) => {
+        yourGameboard.receiveAttack([y,x]);
+        slotsAttacked.push([y,x]);
+    }
+
+    return (attack);
+}
+
 let Computer = (myGameboard, yourGameboard) => {
     let slotsAttacked =[];
     function getRandomInt(min, max) {
@@ -248,7 +263,7 @@ let Computer = (myGameboard, yourGameboard) => {
             x = getRandomInt(0,10);
         }
         yourGameboard.receiveAttack([y,x]);
-        slotsUsed.push([y,x]);
+        slotsAttacked.push([y,x]);
     }
 
     return {placeShips,attack}
