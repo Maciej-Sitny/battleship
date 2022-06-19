@@ -1,5 +1,5 @@
-
 import {Ship, Gameboard, Computer} from './logic.js';
+
 // test('returns error when slot is incorrect', ()=> {
 //     let example = Ship(2);
 //     example.hit(1);

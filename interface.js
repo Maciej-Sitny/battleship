@@ -1,6 +1,60 @@
-import {Ship, Gameboard, Computer} from './logic.js';
+import {Ship, Gameboard, Computer, removeSomething} from './logic.js';
 
 const body = document.querySelector('body');
+
+function isPlacingCorrect(gb,slots, direction) {
+
+}
+
+function updateView(gb,container){
+    gb.tables[2][3] = -2;
+    for (let i=0;i<10;i++){
+        for (let j=0;j<10;j++) {
+            if (gb.tables[j][i]==-1) {
+                let selectable = document.createElement('div');
+                // selectable.addEventListener('mouseover', ()=>{
+                //     if (direction=='horizontal'){
+                        
+                //     }
+                // })
+                selectable.classList.add('void');
+                container.appendChild(selectable);
+            }
+            else if (gb.tables[j][i] == 0){
+                let selectable = document.createElement('div');
+                selectable.classList.add('placed');
+                container.appendChild(selectable);
+            }
+            else if (gb.tables[j][i]==1) {
+                let selectable = document.createElement('div');
+                selectable.classList.add('hit');
+                container.appendChild(selectable);
+            }
+            else if (gb.tables[j][i]==-2) {
+                let selectable = document.createElement('div');
+                selectable.classList.add('prepared');
+                container.appendChild(selectable);
+            }
+        }
+    }
+}
+
+function playerPlacing(name,gb) {
+    
+    let currenrDirection='horizontal';
+    let h1 = body.querySelector('.welcome');
+    h1.innerText = "Place your ships";
+    h1.setAttribute('style', 'font-size:300%;')
+    body.setAttribute('style','gap:12vh;')
+    removeSomething('.singleAndMulti')
+    let container = document.createElement('div');
+    container.classList.add("selectdiv");
+    // 
+    updateView(gb, container);
+    body.appendChild(container);
+    // body.setAttribute('style', 'justify-content:center;')
+}
+
 
 function welcome(){
     let h1 = document.createElement('h1');
@@ -16,7 +70,10 @@ function welcome(){
     single.addEventListener('mouseleave', ()=> {
         single.setAttribute('style', 'background: #000814; color: #ffe8d6; border: 3px solid #ffe8d6;')
     })
-    single.addEventListener('click', ()=>{});
+    single.addEventListener('click', ()=>{
+        let playerGameboard = Gameboard();
+        playerPlacing("dupa",playerGameboard );
+    });
 
     let multi = document.createElement('button');
     multi.classList.add('playerButton')
@@ -39,3 +96,29 @@ function welcome(){
 }
 
 welcome();
+
+// for (let i =0;i<10;i++)
+    //     for (let j =0;j<10;j++) {
+    //         let selectable = document.createElement('div');
+    //         selectable.classList.add('selectable')
+    //         selectable.addEventListener('mouseover', () => {
+    //             if (currenrDirection == "perpendicular"){
+    //                 if(j + ship.length < 10){
+    //                     for (let k=0;k<ship.length;k++) {
+    //                         if (gb.tables[j+k][i]!=-1) return Error
+    //                     }
+    //                     return "ok"
+    //                 }
+    //                 else return Error;
+    //             }
+    //             else if (direction=="horizontal"){
+    //                 if (i+ship.length<10) {
+    //                     for (let k=0;k<ship.length;k++) {
+    //                         if (gb.tables[j][i+k]!=-1) return Error;
+    //                     return "ok"
+    //                        }   }
+    //                 else return Error;
+                
+    //             }
+    //             else return Error;
+    //         })

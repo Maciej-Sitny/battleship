@@ -1,4 +1,4 @@
-export {Ship, Gameboard, Computer};
+export {Ship, Gameboard, Computer, removeSomething};
 const Ship = (slots) => {
     let length=slots;
     let model = []; //element of model is 1 if this slot is hit, 0 if not
@@ -22,6 +22,15 @@ const Ship = (slots) => {
     return {
         length, hit, isSunk, coordinates,
     }
+}
+
+const removeSomething = (something) => {
+    let del = document.querySelectorAll(something);
+    del.forEach(d => d.remove());
+}
+
+function playerPlacing() {
+
 }
 
 const Gameboard = () => {  //koordynaty (coords) => coords[0] to y, coords[1] to x
