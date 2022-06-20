@@ -50,7 +50,7 @@ function updateView(gb,dupa, length, direction){
                                 for (let k = 0; k<length;k++)
                                     if (k<i)
                                         gb.tables[+selectable.id[0]][+selectable.id[1]+k]=-3;
-                                    else gb.tables[+selectable.id[0]][+selectable.id[1]+k]=-4;}
+                                    else gb.tables[+selectable.id[0]][+selectable.id[1]+k]=-4;}//////////////////////////
                         else if (direction=='perpendicular' && +selectable.id[0]+length>=11){
                             if (+selectable.id[0]+i<10)
                                 gb.tables[(+selectable.id[0]+i)][+selectable.id[1]]=-3;
