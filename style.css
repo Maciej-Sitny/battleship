@@ -66,3 +66,10 @@ body {
     height: 30px;
     background: var(--prepared);
 }
+
+.placed {
+    border: 2px solid var(--titleorange);
+    width: 30px;
+    height: 30px;
+    background: var(--black);
+}

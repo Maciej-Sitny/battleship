@@ -6,11 +6,20 @@ function isPlacingCorrect(gb,slots, direction) {
 
 }
 
-function updateView(gb,container){
-    gb.tables[2][3] = -2;
+function updateView(gb,dupa){
+    // let a = document.querySelectorAll('.void')
+    // container.removeChild(a);
+    let a = document.querySelector(dupa);
+    if (a!=null) a.remove();
+    // let b = document.querySelectorAll('.placed')
+    // container.removeChild(b);
+    // removeSomething('.hit');
+    // gb.tables[2][3] = 0;
+    let container = document.createElement('div');
+    container.classList.add("selectdiv");
     for (let i=0;i<10;i++){
         for (let j=0;j<10;j++) {
-            if (gb.tables[j][i]==-1) {
+            if (gb.tables[i][j]==-1) {
                 let selectable = document.createElement('div');
                 // selectable.addEventListener('mouseover', ()=>{
                 //     if (direction=='horizontal'){
@@ -18,25 +27,30 @@ function updateView(gb,container){
                 //     }
                 // })
                 selectable.classList.add('void');
+                selectable.setAttribute('id', `${i}${j}`);
                 container.appendChild(selectable);
             }
-            else if (gb.tables[j][i] == 0){
+            else if (gb.tables[i][j] == 0){
                 let selectable = document.createElement('div');
                 selectable.classList.add('placed');
+                selectable.setAttribute('id', `${i}${j}`);
                 container.appendChild(selectable);
             }
-            else if (gb.tables[j][i]==1) {
+            else if (gb.tables[i][j]==1) {
                 let selectable = document.createElement('div');
                 selectable.classList.add('hit');
+                selectable.setAttribute('id', `${i}${j}`);
                 container.appendChild(selectable);
             }
-            else if (gb.tables[j][i]==-2) {
+            else if (gb.tables[i][j]==-2) {
                 let selectable = document.createElement('div');
+                selectable.setAttribute('id', `${i}${j}`);
                 selectable.classList.add('prepared');
                 container.appendChild(selectable);
             }
         }
     }
+    body.appendChild(container);
 }
 
 function playerPlacing(name,gb) {
@@ -47,11 +61,27 @@ function playerPlacing(name,gb) {
     h1.setAttribute('style', 'font-size:300%;')
     body.setAttribute('style','gap:12vh;')
     removeSomething('.singleAndMulti')
-    let container = document.createElement('div');
-    container.classList.add("selectdiv");
+    // let container = document.createElement('div');
+    // container.classList.add("selectdiv");
     // 
-    updateView(gb, container);
-    body.appendChild(container);
+    updateView(gb, '.selectdiv');
+    let voids = document.querySelectorAll('.void');
+    voids.forEach(v => {
+        v.addEventListener('mouseover', ()=>{
+            for (let i =0;i<4;i++){
+                gb.tables[+v.id[0]+i][v.id[1]]=-2;
+                updateView(gb, '.selectdiv');
+            }
+        })
+        v.addEventListener('mouseleave', ()=>{
+            for (let i =0;i<4;i++){
+                gb.tables[+v.id[0]+i][v.id[1]]=-1;
+                updateView(gb, '.selectdiv');
+            }
+        })
+    })
+    
+    // body.appendChild(container);
     // body.setAttribute('style', 'justify-content:center;')
 }
 
