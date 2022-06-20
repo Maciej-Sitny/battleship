@@ -6,7 +6,7 @@ function isPlacingCorrect(gb,slots, direction) {
 
 }
 
-function updateView(gb,dupa){
+function updateView(gb,dupa, length, direction){
     // let a = document.querySelectorAll('.void')
     // container.removeChild(a);
     let a = document.querySelector(dupa);
@@ -17,6 +17,10 @@ function updateView(gb,dupa){
     // gb.tables[2][3] = 0;
     let container = document.createElement('div');
     container.classList.add("selectdiv");
+    container.addEventListener('contextmenu', ()=> {
+        if (direction=='horizontal') direction = 'perpendicular';
+        else if (direction=='perpendicular') direction = 'horizontal';
+    })
     body.appendChild(container);
     for (let i=0;i<10;i++){
         for (let j=0;j<10;j++) {
@@ -32,23 +36,43 @@ function updateView(gb,dupa){
                 container.appendChild(selectable);
                 
                 selectable.addEventListener('mouseover', ()=>{
-            
-                    for (let i =0;i<4;i++){
-                        gb.tables[+selectable.id[0]+i][selectable.id[1]]=-2;
-                        // console.log(gb.tables);
+                    
+                    for (let i =0;i<length;i++){
+                        if (direction=='perpendicular' && +selectable.id[0]+length<11){
+                            if (gb.tables[+selectable.id[0]+i][+selectable.id[1]]==-1)
+                                gb.tables[+selectable.id[0]+i][+selectable.id[1]]=-2;
+                            else 
+                                gb.tables[+selectable.id[0]+i][+selectable.id[1]]=-3;}
+                        else if (direction=='horizontal' && +selectable.id[1]+length<11){
+                            if (gb.tables[+selectable.id[0]][+selectable.id[1]+i]==-1)
+                                gb.tables[+selectable.id[0]][+selectable.id[1]+i]=-2;
+                            else if (gb.tables[+selectable.id[0]][+selectable.id[1]+i]==0)
+                                for (let k = 0; k<length;k++)
+                                    if (k<i)
+                                        gb.tables[+selectable.id[0]][+selectable.id[1]+k]=-3;
+                                    else gb.tables[+selectable.id[0]][+selectable.id[1]+k]=-4;}
+                        else if (direction=='perpendicular' && +selectable.id[0]+length>=11){
+                            if (+selectable.id[0]+i<10)
+                                gb.tables[(+selectable.id[0]+i)][+selectable.id[1]]=-3;
+                        }
+                        else if (direction=='horizontal' && +selectable.id[1]+length>=11){
+                            gb.tables[+selectable.id[0]][(+selectable.id[1]+i)]=-3;
+                        }
+
                     }
-                    updateView(gb,'.selectdiv')})
+                    updateView(gb,'.selectdiv',length,direction)})
                 
             }
             else if (gb.tables[i][j] == 0){
                 let selectable = document.createElement('div');
-                selectable.classList.add('placed');
+                selectable.setAttribute('style', 'border: 2px solid var(--titleorange);width: 30px;height: 30px;background: blue;')
                 selectable.setAttribute('id', `${i}${j}`);
                 container.appendChild(selectable);
+                // return "placed"
             }
             else if (gb.tables[i][j]==1) {
                 let selectable = document.createElement('div');
-                selectable.classList.add('hit');
+
                 selectable.setAttribute('id', `${i}${j}`);
                 container.appendChild(selectable);
             }
@@ -62,7 +86,39 @@ function updateView(gb,dupa){
                         for (let j =0;j<10;j++){
                             if (gb.tables[i][j]==-2) gb.tables[i][j]=-1;    
                         }}
-                        updateView(gb,'.selectdiv')})
+                        updateView(gb,'.selectdiv',length,direction)})
+                selectable.addEventListener('click', ()=> {
+                    for (let i =0;i<10;i++){
+                        for (let j =0;j<10;j++){
+                            if (gb.tables[i][j]==-2) gb.tables[i][j]=0;    
+                        }}
+                        updateView(gb,'.selectdiv',length,direction)})
+                container.appendChild(selectable);
+            }
+            else if (gb.tables[i][j]==-3) {
+                let selectable = document.createElement('div');
+                selectable.setAttribute('id', `${i}${j}`);
+                selectable.setAttribute('style', 'border: 2px solid var(--titleorange);width: 30px;height: 30px;background: red;')
+                selectable.addEventListener('mouseout', ()=>{
+        
+                    for (let i =0;i<10;i++){
+                        for (let j =0;j<10;j++){
+                            if (gb.tables[i][j]==-3) gb.tables[i][j]=-1;    
+                        }}
+                        updateView(gb,'.selectdiv',length,direction)})
+                container.appendChild(selectable);
+            }
+            else if (gb.tables[i][j]==-4) {
+                let selectable = document.createElement('div');
+                selectable.setAttribute('id', `${i}${j}`);
+                selectable.setAttribute('style', 'border: 2px solid var(--titleorange);width: 30px;height: 30px;background: red;')
+                selectable.addEventListener('mouseout', ()=>{
+        
+                    for (let i =0;i<10;i++){
+                        for (let j =0;j<10;j++){
+                            if (gb.tables[i][j]==-4) gb.tables[i][j]=0;    
+                        }}
+                        updateView(gb,'.selectdiv',length,direction)})
                 container.appendChild(selectable);
             }
         }
@@ -71,7 +127,7 @@ function updateView(gb,dupa){
 
 function playerPlacing(name,gb) {
     
-    let currenrDirection='horizontal';
+    let currentDirection='horizontal';
     let h1 = body.querySelector('.welcome');
     h1.innerText = "Place your ships";
     h1.setAttribute('style', 'font-size:300%;')
@@ -79,33 +135,12 @@ function playerPlacing(name,gb) {
     removeSomething('.singleAndMulti')
     // let container = document.createElement('div');
     // container.classList.add("selectdiv");
-    // 
-    updateView(gb, '.selectdiv');
     
-    let voids = document.querySelectorAll('.void');
-    voids.forEach(v => {
-        // console.log(v.id);
-        // v.addEventListener('mouseleave', ()=>{
 
-        //     for (let i =0;i<4;i++){
-        //         gb.tables[+v.id[0]+i][v.id[1]]=-1;
-        //         console.log('elo')
-        //     }
-        //     updateView(gb, '.selectdiv');
-        // })
-        // v.addEventListener('mouseover', ()=>{
-            
-        //     for (let i =0;i<4;i++){
-        //         gb.tables[+v.id[0]+i][v.id[1]]=-2;
-        //         console.log(gb.tables);
-        //     }
-        //     updateView(gb, '.selectdiv');
-        // })
-        
-    })
+    updateView(gb, '.selectdiv', 4, currentDirection);
+    
     
     // console.log(gb.tables)
-    updateView(gb, '.selectdiv');
     
     // body.appendChild(container);
     // body.setAttribute('style', 'justify-content:center;')
