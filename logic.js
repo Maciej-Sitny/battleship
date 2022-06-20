@@ -278,8 +278,8 @@ let Computer = (myGameboard, yourGameboard) => {
     return {placeShips,attack}
 }
 
-let comp = Gameboard();
-let rival = Gameboard();
-let computer = Computer(comp,rival);
-computer.placeShips();
-console.log(comp.slotsUsed);
+// let comp = Gameboard();
+// let rival = Gameboard();
+// let computer = Computer(comp,rival);
+// computer.placeShips();
+// console.log(comp.slotsUsed);

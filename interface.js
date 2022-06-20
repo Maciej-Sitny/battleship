@@ -17,6 +17,7 @@ function updateView(gb,dupa){
     // gb.tables[2][3] = 0;
     let container = document.createElement('div');
     container.classList.add("selectdiv");
+    body.appendChild(container);
     for (let i=0;i<10;i++){
         for (let j=0;j<10;j++) {
             if (gb.tables[i][j]==-1) {
@@ -29,6 +30,15 @@ function updateView(gb,dupa){
                 selectable.classList.add('void');
                 selectable.setAttribute('id', `${i}${j}`);
                 container.appendChild(selectable);
+                
+                selectable.addEventListener('mouseover', ()=>{
+            
+                    for (let i =0;i<4;i++){
+                        gb.tables[+selectable.id[0]+i][selectable.id[1]]=-2;
+                        // console.log(gb.tables);
+                    }
+                    updateView(gb,'.selectdiv')})
+                
             }
             else if (gb.tables[i][j] == 0){
                 let selectable = document.createElement('div');
@@ -45,12 +55,18 @@ function updateView(gb,dupa){
             else if (gb.tables[i][j]==-2) {
                 let selectable = document.createElement('div');
                 selectable.setAttribute('id', `${i}${j}`);
-                selectable.classList.add('prepared');
+                selectable.setAttribute('style', 'border: 2px solid var(--titleorange);width: 30px;height: 30px;background: var(--prepared);')
+                selectable.addEventListener('mouseout', ()=>{
+        
+                    for (let i =0;i<10;i++){
+                        for (let j =0;j<10;j++){
+                            if (gb.tables[i][j]==-2) gb.tables[i][j]=-1;    
+                        }}
+                        updateView(gb,'.selectdiv')})
                 container.appendChild(selectable);
             }
         }
     }
-    body.appendChild(container);
 }
 
 function playerPlacing(name,gb) {
@@ -65,21 +81,31 @@ function playerPlacing(name,gb) {
     // container.classList.add("selectdiv");
     // 
     updateView(gb, '.selectdiv');
+    
     let voids = document.querySelectorAll('.void');
     voids.forEach(v => {
-        v.addEventListener('mouseover', ()=>{
-            for (let i =0;i<4;i++){
-                gb.tables[+v.id[0]+i][v.id[1]]=-2;
-                updateView(gb, '.selectdiv');
-            }
-        })
-        v.addEventListener('mouseleave', ()=>{
-            for (let i =0;i<4;i++){
-                gb.tables[+v.id[0]+i][v.id[1]]=-1;
-                updateView(gb, '.selectdiv');
-            }
-        })
+        // console.log(v.id);
+        // v.addEventListener('mouseleave', ()=>{
+
+        //     for (let i =0;i<4;i++){
+        //         gb.tables[+v.id[0]+i][v.id[1]]=-1;
+        //         console.log('elo')
+        //     }
+        //     updateView(gb, '.selectdiv');
+        // })
+        // v.addEventListener('mouseover', ()=>{
+            
+        //     for (let i =0;i<4;i++){
+        //         gb.tables[+v.id[0]+i][v.id[1]]=-2;
+        //         console.log(gb.tables);
+        //     }
+        //     updateView(gb, '.selectdiv');
+        // })
+        
     })
+    
+    // console.log(gb.tables)
+    updateView(gb, '.selectdiv');
     
     // body.appendChild(container);
     // body.setAttribute('style', 'justify-content:center;')
