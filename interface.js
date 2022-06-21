@@ -1,12 +1,13 @@
 import {Ship, Gameboard, Computer, removeSomething} from './logic.js';
-
 const body = document.querySelector('body');
 
 function isPlacingCorrect(gb,slots, direction) {
 
 }
 
-function updateView(gb,dupa, length, direction){
+let recentSlots=[];
+
+function updateView(gb,dupa, length, direction,slotsUsed, ){
     // let a = document.querySelectorAll('.void')
     // container.removeChild(a);
     let a = document.querySelector(dupa);
@@ -17,6 +18,7 @@ function updateView(gb,dupa, length, direction){
     // gb.tables[2][3] = 0;
     let container = document.createElement('div');
     container.classList.add("selectdiv");
+    container.addEventListener("contextmenu", e => e.preventDefault());
     container.addEventListener('contextmenu', ()=> {
         if (direction=='horizontal') direction = 'perpendicular';
         else if (direction=='perpendicular') direction = 'horizontal';
@@ -41,16 +43,20 @@ function updateView(gb,dupa, length, direction){
                         if (direction=='perpendicular' && +selectable.id[0]+length<11){
                             if (gb.tables[+selectable.id[0]+i][+selectable.id[1]]==-1)
                                 gb.tables[+selectable.id[0]+i][+selectable.id[1]]=-2;
-                            else 
-                                gb.tables[+selectable.id[0]+i][+selectable.id[1]]=-3;}
+                            else if (gb.tables[+selectable.id[0]+i][+selectable.id[1]]==0){
+                                for (let k = 0; k<length;k++){
+                                    if (k<i)
+                                        gb.tables[+selectable.id[0]+k][+selectable.id[1]]=-3;}break;}}
                         else if (direction=='horizontal' && +selectable.id[1]+length<11){
                             if (gb.tables[+selectable.id[0]][+selectable.id[1]+i]==-1)
+
                                 gb.tables[+selectable.id[0]][+selectable.id[1]+i]=-2;
-                            else if (gb.tables[+selectable.id[0]][+selectable.id[1]+i]==0)
-                                for (let k = 0; k<length;k++)
+                            else if (gb.tables[+selectable.id[0]][+selectable.id[1]+i]==0){
+                                for (let k = 0; k<length;k++){
                                     if (k<i)
-                                        gb.tables[+selectable.id[0]][+selectable.id[1]+k]=-3;
-                                    else gb.tables[+selectable.id[0]][+selectable.id[1]+k]=-4;}//////////////////////////
+                                        gb.tables[+selectable.id[0]][+selectable.id[1]+k]=-3;}break;}}
+                                    // else gb.tables[+selectable.id[0]][+selectable.id[1]+k]=-4;}//////////////////////////
+                                    
                         else if (direction=='perpendicular' && +selectable.id[0]+length>=11){
                             if (+selectable.id[0]+i<10)
                                 gb.tables[(+selectable.id[0]+i)][+selectable.id[1]]=-3;
@@ -88,9 +94,13 @@ function updateView(gb,dupa, length, direction){
                         }}
                         updateView(gb,'.selectdiv',length,direction)})
                 selectable.addEventListener('click', ()=> {
+                    // recentSlots =[]
                     for (let i =0;i<10;i++){
                         for (let j =0;j<10;j++){
-                            if (gb.tables[i][j]==-2) gb.tables[i][j]=0;    
+                            if (gb.tables[i][j]==-2) {
+                                recentSlots.push([i,j]);
+                                console.log(recentSlots)
+                                gb.tables[i][j]=0;    }
                         }}
                         updateView(gb,'.selectdiv',length,direction)})
                 container.appendChild(selectable);
@@ -125,13 +135,34 @@ function updateView(gb,dupa, length, direction){
     }
 }
 
-function playerPlacing(name,gb) {
-    
+function playerPlacing(name,gb,thisMove,lastMove) {
+    const equals = (a, b) => JSON.stringify(a) === JSON.stringify(b);
     let currentDirection='horizontal';
     let h1 = body.querySelector('.welcome');
     h1.innerText = "Place your ships";
     h1.setAttribute('style', 'font-size:300%;')
-    body.setAttribute('style','gap:12vh;')
+    let back = document.createElement('button');
+    back.innerText = 'Back';
+    back.classList.add('playerButton');
+    back.addEventListener('mouseover', ()=> {
+        back.setAttribute('style', 'color: #000814; background: #ffe8d6; border:3px solid #000814;')
+    })
+    back.addEventListener('mouseleave', ()=> {
+        back.setAttribute('style', 'background: #000814; color: #ffe8d6; border: 3px solid #ffe8d6;')
+    })
+    back.addEventListener('click',()=>{
+        for (let i=0;i<10;i++)
+            for (let j =0;j<10;j++){
+                for (let dupa of recentSlots){
+                    if (equals(dupa,[i,j])) {gb.tables[i][j]=-1;break;}
+                }
+                
+            }
+        updateView(gb, '.selectdiv', 4, currentDirection);
+        
+    })
+    body.append(back);
+    body.setAttribute('style','gap:5vh;')
     removeSomething('.singleAndMulti')
     // let container = document.createElement('div');
     // container.classList.add("selectdiv");
@@ -163,7 +194,7 @@ function welcome(){
     })
     single.addEventListener('click', ()=>{
         let playerGameboard = Gameboard();
-        playerPlacing("dupa",playerGameboard );
+        playerPlacing("dupa",playerGameboard, );
     });
 
     let multi = document.createElement('button');
