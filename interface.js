@@ -5,9 +5,11 @@ function isPlacingCorrect(gb,slots, direction) {
 
 }
 
+let numberOfPlacedSlots = 0
+
 let recentSlots=[];
 
-function updateView(gb,dupa, length, direction,slotsUsed, ){
+async function updateView(gb,dupa, length, direction,slotsUsed, ){
     // let a = document.querySelectorAll('.void')
     // container.removeChild(a);
     let a = document.querySelector(dupa);
@@ -94,7 +96,7 @@ function updateView(gb,dupa, length, direction,slotsUsed, ){
                         }}
                         updateView(gb,'.selectdiv',length,direction)})
                 selectable.addEventListener('click', ()=> {
-                    // recentSlots =[]
+                    recentSlots =[]
                     for (let i =0;i<10;i++){
                         for (let j =0;j<10;j++){
                             if (gb.tables[i][j]==-2) {
@@ -102,7 +104,9 @@ function updateView(gb,dupa, length, direction,slotsUsed, ){
                                 console.log(recentSlots)
                                 gb.tables[i][j]=0;    }
                         }}
-                        updateView(gb,'.selectdiv',length,direction)})
+                        updateView(gb,'.selectdiv',length,direction);
+                        return 'elo';
+                    })
                 container.appendChild(selectable);
             }
             else if (gb.tables[i][j]==-3) {
@@ -167,9 +171,11 @@ function playerPlacing(name,gb,thisMove,lastMove) {
     // let container = document.createElement('div');
     // container.classList.add("selectdiv");
     
-
-    updateView(gb, '.selectdiv', 4, currentDirection);
-    
+    // while (numberOfPlacedSlots!=4)
+    let a = updateView(gb, '.selectdiv', 4, currentDirection)
+    if (a=='elo')
+        console.log('siema');
+    else console.log('nie')
     
     // console.log(gb.tables)
     
