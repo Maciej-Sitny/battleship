@@ -9,9 +9,10 @@ let numberOfPlacedSlots = 0
 
 let recentSlots=[];
 
-async function updateView(gb,dupa, length, direction,slotsUsed, ){
+async function updateView(gb,dupa, length, direction,next, used){
     // let a = document.querySelectorAll('.void')
     // container.removeChild(a);
+    if (length==0) {let done = document.createElement('button'); done.innerText='Done';done.classList.add('playerButton'); body.appendChild(done);}
     let a = document.querySelector(dupa);
     if (a!=null) a.remove();
     // let b = document.querySelectorAll('.placed')
@@ -40,7 +41,7 @@ async function updateView(gb,dupa, length, direction,slotsUsed, ){
                 container.appendChild(selectable);
                 
                 selectable.addEventListener('mouseover', ()=>{
-                    
+                    if (length==0) return;
                     for (let i =0;i<length;i++){
                         if (direction=='perpendicular' && +selectable.id[0]+length<11){
                             if (gb.tables[+selectable.id[0]+i][+selectable.id[1]]==-1)
@@ -68,7 +69,7 @@ async function updateView(gb,dupa, length, direction,slotsUsed, ){
                         }
 
                     }
-                    updateView(gb,'.selectdiv',length,direction)})
+                    updateView(gb,'.selectdiv',length,direction,next,used)})
                 
             }
             else if (gb.tables[i][j] == 0){
@@ -94,7 +95,7 @@ async function updateView(gb,dupa, length, direction,slotsUsed, ){
                         for (let j =0;j<10;j++){
                             if (gb.tables[i][j]==-2) gb.tables[i][j]=-1;    
                         }}
-                        updateView(gb,'.selectdiv',length,direction)})
+                        updateView(gb,'.selectdiv',length,direction,next,used)})
                 selectable.addEventListener('click', ()=> {
                     recentSlots =[]
                     for (let i =0;i<10;i++){
@@ -104,8 +105,17 @@ async function updateView(gb,dupa, length, direction,slotsUsed, ){
                                 console.log(recentSlots)
                                 gb.tables[i][j]=0;    }
                         }}
-                        updateView(gb,'.selectdiv',length,direction);
-                        return 'elo';
+                        if (next==true) updateView(gb,'.selectdiv',length-1,direction,false,0);
+                        else {
+                            if (length==3 && used<0) updateView(gb, '.selectdiv', length, direction,false,used+1);
+                            if (length==3 && used==0) updateView(gb, '.selectdiv', length, direction,true,used+1);
+                            else if (length==2 && used<1) updateView(gb, '.selectdiv', length, direction,false,used+1)  
+                            else if (length==2 && used==1) updateView(gb, '.selectdiv', length, direction,true,0)  
+                            else if (length==1 && used<2) updateView(gb, '.selectdiv', length, direction,false,used+1)  
+                            else if (length==1 && used==2) updateView(gb, '.selectdiv', length, direction,true,used+1)  
+                           
+                        }
+                        // return 'elo';
                     })
                 container.appendChild(selectable);
             }
@@ -119,7 +129,7 @@ async function updateView(gb,dupa, length, direction,slotsUsed, ){
                         for (let j =0;j<10;j++){
                             if (gb.tables[i][j]==-3) gb.tables[i][j]=-1;    
                         }}
-                        updateView(gb,'.selectdiv',length,direction)})
+                        updateView(gb,'.selectdiv',length,direction,next,used)})
                 container.appendChild(selectable);
             }
             else if (gb.tables[i][j]==-4) {
@@ -132,7 +142,7 @@ async function updateView(gb,dupa, length, direction,slotsUsed, ){
                         for (let j =0;j<10;j++){
                             if (gb.tables[i][j]==-4) gb.tables[i][j]=0;    
                         }}
-                        updateView(gb,'.selectdiv',length,direction)})
+                        updateView(gb,'.selectdiv',length,direction,next,used)})
                 container.appendChild(selectable);
             }
         }
@@ -165,17 +175,38 @@ function playerPlacing(name,gb,thisMove,lastMove) {
         updateView(gb, '.selectdiv', 4, currentDirection);
         
     })
-    body.append(back);
+    // body.appendChild(back);
     body.setAttribute('style','gap:5vh;')
     removeSomething('.singleAndMulti')
     // let container = document.createElement('div');
     // container.classList.add("selectdiv");
     
     // while (numberOfPlacedSlots!=4)
-    let a = updateView(gb, '.selectdiv', 4, currentDirection)
-    if (a=='elo')
-        console.log('siema');
-    else console.log('nie')
+    let a = updateView(gb, '.selectdiv', 4, currentDirection,true)
+    
+    // if (a=='elo')
+    //     console.log('siema');
+    // else console.log('nie')
+    let container = document.createElement('div');
+    container.classList.add("selectdiv");
+    // container.addEventListener("contextmenu", e => e.preventDefault());
+    // container.addEventListener('contextmenu', ()=> {
+    //     if (direction=='horizontal') direction = 'perpendicular';
+    //     else if (direction=='perpendicular') direction = 'horizontal';
+    // })
+    // body.appendChild(container);
+    // for (let i=0;i<10;i++){
+    //     for (let j=0;j<10;j++) {
+            
+    //             let selectable = document.createElement('div');
+    //             // selectable.addEventListener('mouseover', ()=>{
+    //             //     if (direction=='horizontal'){
+                        
+    //             //     }
+    //             // })
+    //             selectable.classList.add('void');
+    //             selectable.setAttribute('id', `${i}${j}`);
+    //             container.appendChild(selectable);}}
     
     // console.log(gb.tables)
     
