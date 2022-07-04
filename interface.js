@@ -9,10 +9,82 @@ let numberOfPlacedSlots = 0
 
 let recentSlots=[];
 
+function battle(playerGameboard, computerGameboard) {
+    let displayContainer = document.createElement('div');
+    let playerDisplay = document.createElement('div');
+    let computerDisplay = document.createElement('div');
+    let names = document.createElement('div')
+    let playerName = document.createElement('h2')
+    playerName.innerText="You";
+    let computerName = document.createElement('h2')
+    computerName.innerText="Computer";
+    names.setAttribute('style', 'display:flex; width:730px;gap:14px;justify-content:space-around;');
+    names.appendChild(playerName);
+    names.appendChild(computerName);
+    body.appendChild(names);
+    // body.setAttribute('style','gap:10vh;')
+    displayContainer.classList.add('displayContainer');
+    playerDisplay.classList.add('selectdiv');
+    computerDisplay.classList.add('selectdiv')
+    for (let i=0;i<10;i++){
+        for (let j=0;j<10;j++) {
+            if (playerGameboard.tables[i][j]==-1) {
+                let empty = document.createElement('div');
+                empty.classList.add('void');
+                playerDisplay.appendChild(empty)
+            }
+            else if (playerGameboard.tables[i][j]==0){
+                let filled =document.createElement('div');
+                filled.setAttribute('style', 'border: 2px solid var(--titleorange);width: 30px;height: 30px;background: blue;')
+                playerDisplay.appendChild(filled);
+            }
+        }
+    }
+    let computer = Computer(computerGameboard,playerGameboard);
+    computer.placeShips();
+    for (let i=0;i<10;i++){
+        for (let j=0;j<10;j++) {
+            let compDiv = document.createElement('div');
+            compDiv.classList.add('void');
+            compDiv.setAttribute('style', `compDiv${i}${j}`)
+            computerDisplay.appendChild(compDiv);
+            compDiv.addEventListener('click', ()=>{
+                if (computerGameboard.tables[i][j]==0){
+                    computerGameboard.receiveAttack([i,j])
+                    compDiv.classList.add('placed');
+                }
+                else {
+                    compDiv.setAttribute('style', 'border: 2px solid var(--titleorange);width: 30px;height: 30px;background: red;')
+                }
+            })
+        }
+    }
+    displayContainer.appendChild(playerDisplay); 
+    displayContainer.appendChild(computerDisplay); 
+    body.appendChild(displayContainer)
+    body.setAttribute('style','gap:3vh;')
+}
+
 async function updateView(gb,dupa, length, direction,next, used){
     // let a = document.querySelectorAll('.void')
     // container.removeChild(a);
-    if (length==0) {let done = document.createElement('button'); done.innerText='Done';done.classList.add('playerButton'); body.appendChild(done);}
+    if (length==0) {let done = document.createElement('button'); 
+        done.innerText='Done';
+        done.classList.add('playerButton');
+        done.addEventListener('mouseover', ()=> {
+            done.setAttribute('style', 'color: #000814; background: #ffe8d6; border:3px solid #000814;')
+        })
+        done.addEventListener('mouseleave', ()=> {
+            done.setAttribute('style', 'background: #000814; color: #ffe8d6; border: 3px solid #ffe8d6;')
+        })
+        done.addEventListener('click',()=>{
+            removeSomething('.selectdiv')
+            removeSomething('.playerButton')
+            document.querySelector('.welcome').innerText="Let the battle begin!";
+            let a=Gameboard()
+            battle(gb,a)
+        })
+        body.appendChild(done);}
     let a = document.querySelector(dupa);
     if (a!=null) a.remove();
     // let b = document.querySelectorAll('.placed')

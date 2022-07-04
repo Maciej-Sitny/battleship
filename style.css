@@ -73,3 +73,11 @@ body {
     height: 30px;
     background: var(--black);
 }
+
+.displayContainer {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 27px;
+    width: 750px;
+    height: 358px;
+}
