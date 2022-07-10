@@ -73,6 +73,12 @@ body {
     height: 30px;
     background: var(--black);
 }
+.shipSunk {
+    border: 2px solid var(--titleorange);
+    width: 30px;
+    height: 30px;
+    background: yellow;
+}
 
 .displayContainer {
     display: flex;

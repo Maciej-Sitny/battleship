@@ -1,4 +1,5 @@
 import {Ship, Gameboard, Computer, removeSomething} from './logic.js';
+export {blockNeigbours};
 const body = document.querySelector('body');
 
 function isPlacingCorrect(gb,slots, direction) {
@@ -8,8 +9,46 @@ function isPlacingCorrect(gb,slots, direction) {
 let numberOfPlacedSlots = 0
 
 let recentSlots=[];
+let hitCoords=[];
+function updatePlayerSide(playerGameboard,playerDisplay,coords) {
+    hitCoords.push(JSON.stringify(coords))
+    removeSomething('.void');
+    removeSomething('.filled');
+    removeSomething('.hit');
+    
+    for (let i=0;i<10;i++){
+        for (let j=0;j<10;j++) {
+            if (playerGameboard.tables[i][j]==-4) playerGameboard.tables[i][j]=-1;
+            if (hitCoords.includes(JSON.stringify([i,j])) && playerGameboard.tables[i][j]==-1){
+                let m= document.createElement('div');
+                m.setAttribute('style','border: 2px solid var(--titleorange);width: 30px;height: 30px;background:url("miss_ship.jpg")');
+                m.classList.add('hit')
+                playerDisplay.appendChild(m);
+            }
+            else if (playerGameboard.tables[i][j]==-1) {
+                let empty = document.createElement('div');
+                empty.classList.add('void');
+                playerDisplay.appendChild(empty)
+            }
+            else if (playerGameboard.tables[i][j]==0 && hitCoords.includes(JSON.stringify([i,j]))) {
+                let hit = document.createElement('div');
+                hit.setAttribute('style','border: 2px solid var(--titleorange);width: 30px;height: 30px;background:url("hit_ship.jpg");');
+                hit.classList.add('filled')
+                playerDisplay.appendChild(hit);       
+            }
+            else if (playerGameboard.tables[i][j]==0){
+                let filled =document.createElement('div');
+                filled.classList.add('filled');
+                filled.setAttribute('style', 'border: 2px solid var(--titleorange);width: 30px;height: 30px;background: blue;')
+                playerDisplay.appendChild(filled);
+            }
+        }
+    }
+    if (coords!=undefined)
+        if (playerGameboard.tables[coords[0]][coords[1]]==0) return 'hit';
+}
 
-function battle(playerGameboard, computerGameboard) {
+async function battle(playerGameboard, computerGameboard) {
     let displayContainer = document.createElement('div');
     let playerDisplay = document.createElement('div');
     let computerDisplay = document.createElement('div');
@@ -26,37 +65,54 @@ function battle(playerGameboard, computerGameboard) {
     displayContainer.classList.add('displayContainer');
     playerDisplay.classList.add('selectdiv');
     computerDisplay.classList.add('selectdiv')
-    for (let i=0;i<10;i++){
-        for (let j=0;j<10;j++) {
-            if (playerGameboard.tables[i][j]==-1) {
-                let empty = document.createElement('div');
-                empty.classList.add('void');
-                playerDisplay.appendChild(empty)
-            }
-            else if (playerGameboard.tables[i][j]==0){
-                let filled =document.createElement('div');
-                filled.setAttribute('style', 'border: 2px solid var(--titleorange);width: 30px;height: 30px;background: blue;')
-                playerDisplay.appendChild(filled);
+    updatePlayerSide(playerGameboard,playerDisplay);
+    let computer = Computer(computerGameboard,playerGameboard);
+    computer.placeShips();
+    console.log(computer.shipsSlots)
+    let slotsUsedCopy = [...computerGameboard.slotsUsed];
+    function sunkCheck () {
+        for (let i =0;i<10;i++){
+            if (JSON.stringify(computerGameboard.slotsUsed[i])=='[]'){
+                for (let coords of slotsUsedCopy[i]){
+                    document.querySelector(`#compDiv${coords[0]}${coords[1]}`).classList.add('shipSunk')
+                }
+//SPRAWDŻ CZY ARRAY.SPLICE ROBI '[]'
             }
         }
     }
-    let computer = Computer(computerGameboard,playerGameboard);
-    computer.placeShips();
     for (let i=0;i<10;i++){
         for (let j=0;j<10;j++) {
             let compDiv = document.createElement('div');
-            compDiv.classList.add('void');
-            compDiv.setAttribute('style', `compDiv${i}${j}`)
+            compDiv.setAttribute('style', 'border: 2px solid var(--titleorange);width: 30px;height: 30px;');
+            compDiv.setAttribute('id', `compDiv${i}${j}`)
             computerDisplay.appendChild(compDiv);
-            compDiv.addEventListener('click', ()=>{
+            compDiv.addEventListener('click', async ()=>{
                 if (computerGameboard.tables[i][j]==0){
                     computerGameboard.receiveAttack([i,j])
+                    for (let array of computer.shipsSlots){
+                        for (let a of array){
+                            if (JSON.stringify(a)==JSON.stringify([i,j])){
+                                array.splice(array.indexOf(JSON.stringify(a)),1)
+                            }
+                        }
+                    }
                     compDiv.classList.add('placed');
+                    sunkCheck();
+
                 }
                 else {
                     compDiv.setAttribute('style', 'border: 2px solid var(--titleorange);width: 30px;height: 30px;background: red;')
+                    let check = computer.attack()
+                    console.log(`aaaaaaaaaaaaa${check}`)
+                    
+                    while (updatePlayerSide(playerGameboard,playerDisplay,check)=='hit' ){
+                        
+                        
+                        
+                        await new Promise(resolve => setTimeout(resolve, 1700));
+                        check=computer.attack();
                 }
-            })
+                }})
         }
     }
     displayContainer.appendChild(playerDisplay); 
@@ -65,11 +121,40 @@ function battle(playerGameboard, computerGameboard) {
     body.setAttribute('style','gap:3vh;')
 }
 
+function blockNeigbours(gb){
+    for (let i=0;i<10;i++){
+        for (let j=0;j<10;j++){
+            // console.log(gb.tables[i][j])
+            if (gb.tables[i][j]==0){
+                
+                if (i+1>=0 && i+1<=9 && j>=0 && j<=9)
+                    (gb.tables[i+1][j]==-1 ) ? gb.tables[i+1][j]=-4:console.log(gb.tables);
+                if (i+1>=0 && i+1<=9 && j+1>=0 && j+1<=9)  
+                    (gb.tables[i+1][j+1]==-1 ) ? gb.tables[i+1][j+1]=-4:console.log('e2lo');
+                if (i-1>=0 && i-1<=9 && j-1>=0 && j-1<=9)
+                    (gb.tables[i-1][j-1]==-1) ? gb.tables[i-1][j-1]=-4:console.log('el3o');
+                if (i>=0 && i<=9 && j+1>=0 && j+1<=9)
+                    (gb.tables[i][j+1]==-1 ) ? gb.tables[i][j+1]=-4:console.log('elo4');
+                if (i-1>=0 && i-1<=9 && j>=0 && j<=9)
+                    (gb.tables[i-1][j]==-1 ) ? gb.tables[i-1][j]=-4:console.log('elo5');
+                if (i>=0 && i<=9 && j-1>=0 && j-1<=9)    
+                    (gb.tables[i][j-1]==-1) ? gb.tables[i][j-1]=-4:console.log('elo6');
+                if (i+1>=0 && i+1<=9 && j-1>=0 && j-1<=9)    
+                    (gb.tables[i+1][j-1]==-1 ) ? gb.tables[i+1][j-1]=-4:console.log('elo6');
+                if (i-1>=0 && i-1<=9 && j+1>=0 && j+1<=9)    
+                    (gb.tables[i-1][j+1]==-1) ? gb.tables[i-1][j+1]=-4:console.log('elo6');
+            }
+            
+        }
+    }
+}
+
 async function updateView(gb,dupa, length, direction,next, used){
     // let a = document.querySelectorAll('.void')
     // container.removeChild(a);
-    if (length==0) {let done = document.createElement('button'); 
+    if (length==0 && document.querySelector('#doneButton')==null) {let done = document.createElement('button'); 
         done.innerText='Done';
+        done.setAttribute('id','doneButton')
         done.classList.add('playerButton');
         done.addEventListener('mouseover', ()=> {
             done.setAttribute('style', 'color: #000814; background: #ffe8d6; border:3px solid #000814;')
@@ -114,24 +199,61 @@ async function updateView(gb,dupa, length, direction,next, used){
                 
                 selectable.addEventListener('mouseover', ()=>{
                     if (length==0) return;
+                    let temp=false;
                     for (let i =0;i<length;i++){
                         if (direction=='perpendicular' && +selectable.id[0]+length<11){
                             if (gb.tables[+selectable.id[0]+i][+selectable.id[1]]==-1)
                                 gb.tables[+selectable.id[0]+i][+selectable.id[1]]=-2;
-                            else if (gb.tables[+selectable.id[0]+i][+selectable.id[1]]==0){
+                            else if (gb.tables[+selectable.id[0]+i][+selectable.id[1]]==0 ){
                                 for (let k = 0; k<length;k++){
                                     if (k<i)
-                                        gb.tables[+selectable.id[0]+k][+selectable.id[1]]=-3;}break;}}
+                                        gb.tables[+selectable.id[0]+k][+selectable.id[1]]=-3;}break;}
+                            
+                            else if (gb.tables[+selectable.id[0]+i][+selectable.id[1]]==-4){
+                                gb.tables[+selectable.id[0]+i][+selectable.id[1]]=-5
+                                
+                                    for (let k = 0; k<length;k++){
+                                        if (k<=i)
+                                            if (gb.tables[+selectable.id[0]+k][+selectable.id[1]]==-4)
+                                                gb.tables[+selectable.id[0]+k][+selectable.id[1]]=-5;
+                                            else if (gb.tables[+selectable.id[0]+k][+selectable.id[1]]==-2)
+                                                gb.tables[+selectable.id[0]+k][+selectable.id[1]]=-3;
+                                        else {
+                                            if (gb.tables[+selectable.id[0]+k][+selectable.id[1]]==0)break;
+                                            else if (gb.tables[+selectable.id[0]+k][+selectable.id[1]]==-2 )gb.tables[+selectable.id[0]+k][+selectable.id[1]]=-3;
+                                            else if (gb.tables[+selectable.id[0]+k][+selectable.id[1]]==-4 )gb.tables[+selectable.id[0]+k][+selectable.id[1]]=-5;
+                                            
+                                        }
+                                        }break;}
+                            }
                         else if (direction=='horizontal' && +selectable.id[1]+length<11){
                             if (gb.tables[+selectable.id[0]][+selectable.id[1]+i]==-1)
 
                                 gb.tables[+selectable.id[0]][+selectable.id[1]+i]=-2;
-                            else if (gb.tables[+selectable.id[0]][+selectable.id[1]+i]==0){
+                            else if (gb.tables[+selectable.id[0]][+selectable.id[1]+i]==-4){
+                                gb.tables[+selectable.id[0]][+selectable.id[1]+i]=-5
+                                
+                                for (let k = 0; k<length;k++){
+                                    if (k<=i){
+                                        if (gb.tables[+selectable.id[0]][+selectable.id[1]+k]==-4)
+                                            gb.tables[+selectable.id[0]][+selectable.id[1]+k]=-5;
+                                        else if (gb.tables[+selectable.id[0]][+selectable.id[1]+k]==-2)
+                                            gb.tables[+selectable.id[0]][+selectable.id[1]+k]=-3;}
+                                    else {
+                                        if (gb.tables[+selectable.id[0]][+selectable.id[1]+k]==0)break;
+                                        else if (gb.tables[+selectable.id[0]][+selectable.id[1]+k]==-2 )gb.tables[+selectable.id[0]][+selectable.id[1]+k]=-3;
+                                        else if (gb.tables[+selectable.id[0]][+selectable.id[1]+k]==-4 )gb.tables[+selectable.id[0]][+selectable.id[1]+k]=-5;
+                                        
+                                    }
+                                    }break;
+                            }    
+                            else if (gb.tables[+selectable.id[0]][+selectable.id[1]+i]==0 ){
                                 for (let k = 0; k<length;k++){
                                     if (k<i)
-                                        gb.tables[+selectable.id[0]][+selectable.id[1]+k]=-3;}break;}}
+                                        gb.tables[+selectable.id[0]][+selectable.id[1]+k]=-3;}break;}
                                     // else gb.tables[+selectable.id[0]][+selectable.id[1]+k]=-4;}//////////////////////////
-                                    
+                                                        
+                        }
                         else if (direction=='perpendicular' && +selectable.id[0]+length>=11){
                             if (+selectable.id[0]+i<10)
                                 gb.tables[(+selectable.id[0]+i)][+selectable.id[1]]=-3;
@@ -149,6 +271,8 @@ async function updateView(gb,dupa, length, direction,next, used){
                 selectable.setAttribute('style', 'border: 2px solid var(--titleorange);width: 30px;height: 30px;background: blue;')
                 selectable.setAttribute('id', `${i}${j}`);
                 container.appendChild(selectable);
+                blockNeigbours(gb)
+
                 // return "placed"
             }
             else if (gb.tables[i][j]==1) {
@@ -176,6 +300,7 @@ async function updateView(gb,dupa, length, direction,next, used){
                                 recentSlots.push([i,j]);
                                 console.log(recentSlots)
                                 gb.tables[i][j]=0;    }
+                            else if (gb.tables[i][j]==-5) gb.tables[i][j]=-4;
                         }}
                         if (next==true) updateView(gb,'.selectdiv',length-1,direction,false,0);
                         else {
@@ -200,11 +325,12 @@ async function updateView(gb,dupa, length, direction,next, used){
                     for (let i =0;i<10;i++){
                         for (let j =0;j<10;j++){
                             if (gb.tables[i][j]==-3) gb.tables[i][j]=-1;    
+                            else if (gb.tables[i][j]==-5) gb.tables[i][j]=-4;    
                         }}
                         updateView(gb,'.selectdiv',length,direction,next,used)})
                 container.appendChild(selectable);
             }
-            else if (gb.tables[i][j]==-4) {
+            else if (gb.tables[i][j]==-5) {
                 let selectable = document.createElement('div');
                 selectable.setAttribute('id', `${i}${j}`);
                 selectable.setAttribute('style', 'border: 2px solid var(--titleorange);width: 30px;height: 30px;background: red;')
@@ -212,9 +338,54 @@ async function updateView(gb,dupa, length, direction,next, used){
         
                     for (let i =0;i<10;i++){
                         for (let j =0;j<10;j++){
-                            if (gb.tables[i][j]==-4) gb.tables[i][j]=0;    
+                            if (gb.tables[i][j]==-5) gb.tables[i][j]=-4;    
+                            else if (gb.tables[i][j]==-3) gb.tables[i][j]=-1;    
                         }}
                         updateView(gb,'.selectdiv',length,direction,next,used)})
+                container.appendChild(selectable);
+            }
+            else if (gb.tables[i][j]==-4) {
+                let selectable = document.createElement('div');
+                selectable.setAttribute('id', `${i}${j}`);
+                selectable.setAttribute('style', 'border: 2px solid var(--titleorange);width: 30px;height: 30px;')
+                selectable.addEventListener('mouseover', ()=>{
+                    
+                    // selectable.setAttribute('style', 'border: 2px solid var(--titleorange);width: 30px;height: 30px;background: red;')
+                    for (let i =0;i<length;i++){
+                        if (direction=='perpendicular' && +selectable.id[0]+length<11){
+                            if (gb.tables[+selectable.id[0]+i][+selectable.id[1]]==-4 ) 
+                                gb.tables[+selectable.id[0]+i][+selectable.id[1]]=-5
+                            else if (gb.tables[+selectable.id[0]+i][+selectable.id[1]]==-1)
+                                gb.tables[+selectable.id[0]+i][+selectable.id[1]]=-3
+                            else if (gb.tables[+selectable.id[0]+i][+selectable.id[1]]==0){
+                                for (let k =0;k<i;k++)
+                                gb.tables[+selectable.id[0]+k][+selectable.id[1]]=-3;
+                                break
+                            }
+                        }
+                        else if (direction=='horizontal' && +selectable.id[1]+length<11){
+                            if (gb.tables[+selectable.id[0]][+selectable.id[1]+i]==-4) 
+                                gb.tables[+selectable.id[0]][+selectable.id[1]+i]=-5
+                            else if (gb.tables[+selectable.id[0]][+selectable.id[1]+i]==-1)
+                                gb.tables[+selectable.id[0]][+selectable.id[1]+i]=-3 
+                            else if (gb.tables[+selectable.id[0]][+selectable.id[1]+i]==0){
+                                for (let k =0;k<i;k++)
+                                    gb.tables[+selectable.id[0]][+selectable.id[1]+k]=-3; 
+                                break; 
+                            }
+                        }
+                        
+                    }
+                    // for (let i =0;i<10;i++){
+                    //     for (let j =0;j<10;j++){
+                    //         if (gb.tables[i][j]==-4) gb.tables[i][j]=0;    
+                    //     }}
+                        updateView(gb,'.selectdiv',length,direction,next,used)
+                })
+                selectable.addEventListener('mouseout',()=>{
+                    selectable.setAttribute('style', 'border: 2px solid var(--titleorange);width: 30px;height: 30px;')
+
+                })
                 container.appendChild(selectable);
             }
         }
@@ -294,7 +465,7 @@ function welcome(){
 
     let single = document.createElement('button');
     single.classList.add('playerButton');
-    single.innerText = "Singleplayer";
+    single.innerText = "Start";
     single.addEventListener('mouseover', ()=> {
         single.setAttribute('style', 'color: #000814; background: #ffe8d6; border:3px solid #000814;')
     })
@@ -320,7 +491,7 @@ function welcome(){
     let buttons = document.createElement('div');
     buttons.classList.add('singleAndMulti');
     buttons.appendChild(single);
-    buttons.appendChild(multi);
+    // buttons.appendChild(multi);
 
     body.appendChild(h1);
     body.appendChild(buttons);

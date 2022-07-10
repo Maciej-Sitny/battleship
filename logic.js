@@ -1,4 +1,5 @@
 export {Ship, Gameboard, Computer, removeSomething};
+import { blockNeigbours } from "./interface.js";
 const Ship = (slots) => {
     let length=slots;
     let model = []; //element of model is 1 if this slot is hit, 0 if not
@@ -54,28 +55,32 @@ const Gameboard = () => {  //koordynaty (coords) => coords[0] to y, coords[1] to
     }
     let placeShip = (ship,coords, direction)=>{ //cords array, direction "horizontal" or "perpendicular"
         if (direction == "perpendicular"){
+            let temp=[];
             if(coords[0] + ship.length < 10){
                 for (let i=0;i<ship.length;i++) {
                     if (tables[coords[0]+i][coords[1]]!=-1) return Error
                     tables[coords[0]+i][coords[1]]+=1;
                     ship.coordinates.push([coords[0]+i,coords[1]])
-                    slotsUsed.push([coords[0]+i,coords[1]]);
+                    temp.push([coords[0]+i,coords[1]]);
                 }
+                slotsUsed.push(temp)
                 ships.push(ship);
                 return "ok"
             }
             else return Error;
         }
         else if (direction=="horizontal"){
+            let temp=[];
             if (coords[1]+ship.length<10) {
                 for (let i=0;i<ship.length;i++) {
                     if (tables[coords[0]][coords[1]+i]!=-1) return Error
                     ship.coordinates.push([coords[0],coords[1]+i]);
                     tables[coords[0]][coords[1]+i]+=1;
-                    slotsUsed.push([coords[0],coords[1]+i]);
+                    temp.push([coords[0],coords[1]+i]);
 
                 }
                 ships.push(ship);
+                slotsUsed.push(temp);
                 return "ok"
             }
             else return Error;
@@ -89,7 +94,7 @@ const Gameboard = () => {  //koordynaty (coords) => coords[0] to y, coords[1] to
                     if (JSON.stringify(coord) === JSON.stringify(coords)){ //gotta use JSON.stringify because simple == or === doesn't work with arrays
                         ships[i].hit(ships[i].coordinates.indexOf(coord)+1);
                         tables[coords[0]][coords[1]] =1;
-                        slotsUsed.push(coords);
+                        // slotsUsed.push(coords);
                         return "Hit";
                     }
                 }
@@ -97,7 +102,7 @@ const Gameboard = () => {  //koordynaty (coords) => coords[0] to y, coords[1] to
         }
         else if (tables[coords[0]][coords[1]] == -1) {
             missed.push([[coords[0]],[coords[1]]]);
-            slotsUsed.push(coords);
+            // slotsUsed.push(coords);
 
             return "Miss";
         }
@@ -131,21 +136,25 @@ let Player = (myGameboard, yourGameboard) => {
 
 let Computer = (myGameboard, yourGameboard) => {
     let slotsAttacked =[];
+    let shipsSlots=[]
     function getRandomInt(min, max) {
         min = Math.ceil(min);
         max = Math.floor(max-1);
         return Math.floor(Math.random() * (max - min + 1)) + min;
     }
 
+    
+    
+
     function baranie(ship, coords,direction){
         if (direction == 'perpendicular'){
             for (let i=0;i<ship.length;i++) {
-                if (myGameboard.tables[coords[0]+i][coords[1]]!=-1) return Error;        
+                if (myGameboard.tables[coords[0]+i][coords[1]]!=-1 && myGameboard.tables[coords[0]+i][coords[1]]!=-4) return Error;        
             }
         }
         else if (direction=='horizontal'){
             for (let i=0;i<ship.length;i++) {
-                if (myGameboard.tables[coords[0]][coords[1]+i]!=-1) return Error;      
+                if (myGameboard.tables[coords[0]][coords[1]+i]!=-1 && myGameboard.tables[coords[0]][coords[1]+i]!=-4) return Error;      
             }
         }
         return "git";
@@ -158,21 +167,37 @@ let Computer = (myGameboard, yourGameboard) => {
             y = getRandomInt(range1[0],range1[1]);
             x = getRandomInt(range2[0],range2[1]);
         }
+        let shipArray=[]
+        if (direction == 'perpendicular') {
+            for (let i =0;i<ship.length;i++) shipArray.push(JSON.stringify([y+i,x]))
+        }
+        else if (direction == 'horizontal') {
+            for (let i =0;i<ship.length;i++) shipArray.push(JSON.stringify([y,x+i]))
+        }
+        // shipsSlots.push(shipArray)
         return [y,x];
     }
 
     let placeShips = ()=>{
         let four = Ship(4);
         if (getRandomInt(0,2) == 0){
+            let temp;
             while (myGameboard.slotsUsed.length!=4){
-                 myGameboard.placeShip(four, generateNumber([0,7],[0,10],myGameboard.slotsUsed,four,'perpendicular'),'perpendicular');}
+                temp=generateNumber([0,7],[0,10],myGameboard.slotsUsed,four,'perpendicular');
+                 myGameboard.placeShip(four, temp,'perpendicular');
+            }
+            shipsSlots.push(JSON.stringify(temp));
             
         }
         else {
+            let temp;
             while (myGameboard.slotsUsed.length!=4){
-                 myGameboard.placeShip(four, generateNumber([0,10],[0,7],myGameboard.slotsUsed,four,'horizontal'),'horizontal');}
-            
+                temp = generateNumber([0,10],[0,7],myGameboard.slotsUsed,four,'horizontal');
+                 myGameboard.placeShip(four, temp,'horizontal');}
+            console.log(`eeeeoeoeoeo ${temp}`)
+            shipsSlots.push(JSON.stringify(temp))
         }
+        blockNeigbours(myGameboard)
         let three1 = Ship(3);
         let three2 = Ship(3);
         if (getRandomInt(0,2)==0){
@@ -185,6 +210,8 @@ let Computer = (myGameboard, yourGameboard) => {
                  myGameboard.placeShip(three1, generateNumber([0,10],[0,8],myGameboard.slotsUsed,three1,'horizontal'),'horizontal');;
             }
         }
+        blockNeigbours(myGameboard)
+
         if (getRandomInt(0,2)==0){
             while (myGameboard.slotsUsed.length!=10){
                 myGameboard.placeShip(three2, generateNumber([0,8],[0,10],myGameboard.slotsUsed,three2,'perpendicular'),'perpendicular');
@@ -195,6 +222,8 @@ let Computer = (myGameboard, yourGameboard) => {
                 myGameboard.placeShip(three2, generateNumber([0,10],[0,8],myGameboard.slotsUsed,three2,'horizontal'),'horizontal');
             }
         }
+        blockNeigbours(myGameboard)
+
         let two1 = Ship(2)
         let two2 = Ship(2)
         let two3 = Ship(2)
@@ -209,6 +238,8 @@ let Computer = (myGameboard, yourGameboard) => {
                 myGameboard.placeShip(two1, generateNumber([0,9],[0,10],myGameboard.slotsUsed,two1,'perpendicular'),'perpendicular');
             }
         }
+        blockNeigbours(myGameboard)
+
         if (getRandomInt(0,2)==0){
             while(myGameboard.slotsUsed.length!=14){
                 myGameboard.placeShip(two2, generateNumber([0,10],[0,9],myGameboard.slotsUsed,two2,'horizontal'),'horizontal');
@@ -219,6 +250,8 @@ let Computer = (myGameboard, yourGameboard) => {
                 myGameboard.placeShip(two2, generateNumber([0,9],[0,10],myGameboard.slotsUsed,two2,'perpendicular'),'perpendicular');
             }
         }
+        blockNeigbours(myGameboard)
+
         if (getRandomInt(0,2)==0){
             while(myGameboard.slotsUsed.length!=16){
                 myGameboard.placeShip(two3, generateNumber([0,10],[0,9],myGameboard.slotsUsed,two3,'horizontal'),'horizontal');
@@ -229,6 +262,7 @@ let Computer = (myGameboard, yourGameboard) => {
                 if (myGameboard.placeShip(two3, generateNumber([0,9],[0,10],myGameboard.slotsUsed,two3,'perpendicular'),'perpendicular')==Error)myGameboard.placeShip(two3, generateNumber([0,9],[0,10],myGameboard.slotsUsed,two3,'horizontal'),'perpendicular');
             }
         }
+        blockNeigbours(myGameboard)
 
         let one1=Ship(1);
         let one2=Ship(1);
@@ -244,38 +278,47 @@ let Computer = (myGameboard, yourGameboard) => {
                 myGameboard.placeShip(one1, generateNumber([0,10],[0,10],myGameboard.slotsUsed,one1,'perpendicular'),'perpendicular');
             }
         }
+        blockNeigbours(myGameboard)
+
         if (getRandomInt(0,2)==0){
             while(myGameboard.slotsUsed.length!=18){
             myGameboard.placeShip(one2, generateNumber([0,10],[0,10],myGameboard.slotsUsed,one2,'horizontal'),'horizontal');
             }
         }
         else {while(myGameboard.slotsUsed.length!=18){myGameboard.placeShip(one2, generateNumber([0,10],[0,10],myGameboard.slotsUsed,one2,'perpendicular'),'perpendicular');}}
+        blockNeigbours(myGameboard)
+
         if (getRandomInt(0,2)==0){
             while(myGameboard.slotsUsed.length!=19){
             myGameboard.placeShip(one3, generateNumber([0,10],[0,10],myGameboard.slotsUsed,one3,'horizontal'),'horizontal');
             }
         }
         else {while(myGameboard.slotsUsed.length!=19){myGameboard.placeShip(one3, generateNumber([0,10],[0,10],myGameboard.slotsUsed,one3,'perpendicular'),'perpendicular');}}
+        blockNeigbours(myGameboard)
+
         if (getRandomInt(0,2)==0){
             while(myGameboard.slotsUsed.length!=20){
                 myGameboard.placeShip(one4, generateNumber([0,10],[0,10],myGameboard.slotsUsed,one4,'horizontal'),'horizontal');
             }
         }
         else {while(myGameboard.slotsUsed.length!=20){myGameboard.placeShip(one4, generateNumber([0,10],[0,10],myGameboard.slotsUsed,one4,'perpendicular'),'perpendicular');}}
+        blockNeigbours(myGameboard)
+
     }
 
     let attack = () => {
         let y = getRandomInt(0,10);
         let x = getRandomInt(0,10);
-        while (slotsAttacked.includes([y,x])!=false){
+        while (slotsAttacked.includes(JSON.stringify([y,x]))!=false){
             y = getRandomInt(0,10);
             x = getRandomInt(0,10);
         }
-        yourGameboard.receiveAttack([y,x]);
-        slotsAttacked.push([y,x]);
+        // yourGameboard.receiveAttack([y,x]);
+        slotsAttacked.push(JSON.stringify([y,x]));
+        return [y,x]
     }
 
-    return {placeShips,attack}
+    return {placeShips,attack,shipsSlots}
 }
 
 // let comp = Gameboard();
