@@ -68,18 +68,51 @@ async function battle(playerGameboard, computerGameboard) {
     updatePlayerSide(playerGameboard,playerDisplay);
     let computer = Computer(computerGameboard,playerGameboard);
     computer.placeShips();
-    console.log(computer.shipsSlots)
-    let slotsUsedCopy = [...computerGameboard.slotsUsed];
-    function sunkCheck () {
+    console.log(computerGameboard.slotsUsed)
+    let sunkArray=[]
+    for (let i=0;i<10;i++) sunkArray.push([]);
+    for (let i=0;i<4;i++) sunkArray[0].push(computerGameboard.slotsUsed[i])
+    for (let i=4;i<7;i++) sunkArray[1].push(computerGameboard.slotsUsed[i])
+    for (let i=7;i<10;i++) sunkArray[2].push(computerGameboard.slotsUsed[i])
+    for (let i=10;i<12;i++) sunkArray[3].push(computerGameboard.slotsUsed[i])
+    for (let i=12;i<14;i++) sunkArray[4].push(computerGameboard.slotsUsed[i])
+    for (let i=14;i<16;i++) sunkArray[5].push(computerGameboard.slotsUsed[i])
+    for (let i=16;i<17;i++) sunkArray[6].push(computerGameboard.slotsUsed[i])
+    for (let i=17;i<18;i++) sunkArray[7].push(computerGameboard.slotsUsed[i])
+    for (let i=18;i<19;i++) sunkArray[8].push(computerGameboard.slotsUsed[i])
+    for (let i=19;i<20;i++) sunkArray[9].push(computerGameboard.slotsUsed[i])
+    let sunkArrayCopy = [];
+    for (let i=0;i<10;i++) sunkArrayCopy.push([]);
+    for (let i=0;i<10;i++)
+        for (let j=0;j<sunkArray[i].length;j++){
+            sunkArrayCopy[i][j]=sunkArray[i][j]
+        }
+    for (let array of sunkArray) {
+        for (let a of array) a=JSON.stringify(a);
+    }
+    console.log(sunkArrayCopy)
+    function playerWin() {
         for (let i =0;i<10;i++){
-            if (JSON.stringify(computerGameboard.slotsUsed[i])=='[]'){
-                for (let coords of slotsUsedCopy[i]){
+            if (sunkArray[i].length!=0) return 'no';
+        }
+        let winDisplay = document.createElement('div')
+        winDisplay.innerText='You won!'
+        body.appendChild(winDisplay);
+    }
+    function sunkCheck () {
+        
+        for (let i =0;i<10;i++){
+            if (sunkArray[i].length==0){
+                for (let coords of sunkArrayCopy[i]){
+                    console.log('co tam');
+                    document.querySelector(`#compDiv${coords[0]}${coords[1]}`).classList.remove('placed')
                     document.querySelector(`#compDiv${coords[0]}${coords[1]}`).classList.add('shipSunk')
                 }
 //SPRAWDŻ CZY ARRAY.SPLICE ROBI '[]'
             }
         }
     }
+    let prevCoords;
     for (let i=0;i<10;i++){
         for (let j=0;j<10;j++) {
             let compDiv = document.createElement('div');
@@ -87,31 +120,43 @@ async function battle(playerGameboard, computerGameboard) {
             compDiv.setAttribute('id', `compDiv${i}${j}`)
             computerDisplay.appendChild(compDiv);
             compDiv.addEventListener('click', async ()=>{
+                let wasHit=false;
+                let beginning;
+                let start=false;
                 if (computerGameboard.tables[i][j]==0){
-                    computerGameboard.receiveAttack([i,j])
-                    for (let array of computer.shipsSlots){
+                    for (let array of sunkArray){
                         for (let a of array){
                             if (JSON.stringify(a)==JSON.stringify([i,j])){
-                                array.splice(array.indexOf(JSON.stringify(a)),1)
+                                array.splice(array.indexOf(a),1);
+                                break;
                             }
                         }
                     }
+                    computerGameboard.tables[i][j]=1;
+                    computerGameboard.receiveAttack([i,j])
                     compDiv.classList.add('placed');
                     sunkCheck();
+                    playerWin();
 
                 }
-                else {
+                else if (computerGameboard.tables[i][j]==-1 || computerGameboard.tables[i][j]==-4){
                     compDiv.setAttribute('style', 'border: 2px solid var(--titleorange);width: 30px;height: 30px;background: red;')
-                    let check = computer.attack()
+                    computerGameboard.tables[i][j]=-101;
+                    let check = computer.attack(false,[],null)
                     console.log(`aaaaaaaaaaaaa${check}`)
-                    
-                    while (updatePlayerSide(playerGameboard,playerDisplay,check)=='hit' ){
-                        
-                        
-                        
+                    if (start==false&&updatePlayerSide(playerGameboard,playerDisplay,[check[0],check[1]])=='hit') {beginning = [check[0],check[1]];start=true;}
+                    while (updatePlayerSide(playerGameboard,playerDisplay,[check[0],check[1]])=='hit' ){
+                        prevCoords=[check[0],check[1]];
+                        wasHit=true
+                        computerDisplay.setAttribute('style','pointer-events:none;')
                         await new Promise(resolve => setTimeout(resolve, 1700));
-                        check=computer.attack();
-                }
+                        check=computer.attack(true,prevCoords,check[2]);
+
+                    }
+                    wasHit=false;
+                    prevCoords=[...beginning];
+                    computerDisplay.setAttribute('style','pointer-events:auto;')
+
                 }})
         }
     }
